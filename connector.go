@@ -112,7 +112,7 @@ func (mc *Connector) HealthCheck(ctx context.Context, configuration *Configurati
 
 func (mc *Connector) GetCapabilities(configuration *Configuration) schema.CapabilitiesResponseMarshaler {
 	return &schema.CapabilitiesResponse{
-		Version: "0.1.0",
+		Versions: "0.1.0",
 		Capabilities: schema.Capabilities{
 			Query: schema.QueryCapabilities{
 				Aggregates: schema.LeafCapability{},
@@ -138,16 +138,10 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 						ResultType: schema.NewNullableNamedType("Int").Encode(),
 					},
 				},
-				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
-					"eq": schema.NewComparisonOperatorEqual().Encode(),
-					"in": schema.NewComparisonOperatorIn().Encode(),
-				},
 			},
 			"String": {
 				AggregateFunctions: schema.ScalarTypeAggregateFunctions{},
 				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
-					"eq":   schema.NewComparisonOperatorEqual().Encode(),
-					"in":   schema.NewComparisonOperatorIn().Encode(),
 					"like": schema.NewComparisonOperatorCustom(schema.NewNamedType("String")).Encode(),
 				},
 			},
@@ -329,17 +323,6 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 					},
 				},
 				ResultType: schema.NewNullableNamedType("article").Encode(),
-			},
-			{
-				Name:        "delete_articles",
-				Description: utils.ToPtr("Delete articles which match a predicate"),
-				Arguments: schema.ProcedureInfoArguments{
-					"where": schema.ArgumentInfo{
-						Description: utils.ToPtr("The predicate"),
-						Type:        schema.NewPredicateType("article").Encode(),
-					},
-				},
-				ResultType: schema.NewArrayType(schema.NewNamedType("article")).Encode(),
 			},
 		},
 	}, nil

@@ -3,7 +3,6 @@ FROM golang:1.22 AS builder
 
 WORKDIR /app
 COPY . .
-RUN cp go.mod.build go.mod
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build -v -o ndc-cli .
 

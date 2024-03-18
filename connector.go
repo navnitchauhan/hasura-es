@@ -138,193 +138,125 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 						ResultType: schema.NewNullableNamedType("Int").Encode(),
 					},
 				},
+				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
+					"eq": schema.NewComparisonOperatorEqual().Encode(),
+					"in": schema.NewComparisonOperatorIn().Encode(),
+				},
 			},
-			"String": {
+			"Float": schema.ScalarType{
+				AggregateFunctions: schema.ScalarTypeAggregateFunctions{
+					"max": schema.AggregateFunctionDefinition{
+						ResultType: schema.NewNullableNamedType("Float").Encode(),
+					},
+					"min": schema.AggregateFunctionDefinition{
+						ResultType: schema.NewNullableNamedType("Float").Encode(),
+					},
+				},
+				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
+					"eq": schema.NewComparisonOperatorEqual().Encode(),
+					"in": schema.NewComparisonOperatorIn().Encode(),
+				},
+			},
+			"String": schema.ScalarType{
 				AggregateFunctions: schema.ScalarTypeAggregateFunctions{},
 				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
+					"eq":   schema.NewComparisonOperatorEqual().Encode(),
+					"in":   schema.NewComparisonOperatorIn().Encode(),
 					"like": schema.NewComparisonOperatorCustom(schema.NewNamedType("String")).Encode(),
 				},
 			},
 		},
 		ObjectTypes: schema.SchemaResponseObjectTypes{
-			"article": schema.ObjectType{
-				Description: utils.ToPtr("An article"),
+			"kibana_sample_data_ecommerce": schema.ObjectType{
+				Description: nil,
 				Fields: schema.ObjectTypeFields{
-					"author_id": schema.ObjectField{
-						Description: utils.ToPtr("The article's author ID"),
-						Type:        schema.NewNamedType("Int").Encode(),
-					},
-					"id": {
-						Description: utils.ToPtr("The article's primary key"),
-						Type:        schema.NewNamedType("Int").Encode(),
-					},
-					"title": {
-						Description: utils.ToPtr("The article's title"),
+					"_id":      {Type: schema.NewNamedType("String").Encode()},
+					"category": {Type: schema.NewNamedType("String").Encode()},
+					"currency": {Type: schema.NewNamedType("String").Encode()},
+					"customer_birth_date": {
 						Type:        schema.NewNamedType("String").Encode(),
+						Description: utils.ToPtr("handle date object"),
 					},
+					"customer_first_name": {Type: schema.NewNamedType("String").Encode()},
+					"customer_full_name":  {Type: schema.NewNamedType("String").Encode()},
+					"customer_gender":     {Type: schema.NewNamedType("String").Encode()},
+					"customer_id":         {Type: schema.NewNamedType("String").Encode()},
+					"customer_last_name":  {Type: schema.NewNamedType("String").Encode()},
+					"customer_phone":      {Type: schema.NewNamedType("String").Encode()},
+					"day_of_week":         {Type: schema.NewNamedType("String").Encode()},
+					"day_of_week_i":       {Type: schema.NewNamedType("Int").Encode()},
+					"event":               {Type: schema.NewNamedType("event").Encode()},
+					"geoip":               {Type: schema.NewNamedType("geoip").Encode()},
+					"manufacturer":        {Type: schema.NewNamedType("String").Encode()},
+					"order_date": {
+						Type:        schema.NewNamedType("String").Encode(),
+						Description: utils.ToPtr("handle date object"),
+					},
+					"products":              {Type: schema.NewNamedType("products").Encode()},
+					"sku":                   {Type: schema.NewArrayType(schema.NewNamedType("String")).Encode()},
+					"taxful_total_price":    {Type: schema.NewNamedType("Float").Encode()},
+					"taxless_total_price":   {Type: schema.NewNamedType("Float").Encode()},
+					"total_quantity":        {Type: schema.NewNamedType("Int").Encode()},
+					"total_unique_products": {Type: schema.NewNamedType("Int").Encode()},
+					"type":                  {Type: schema.NewNamedType("String").Encode()},
+					"user":                  {Type: schema.NewNamedType("String").Encode()},
 				},
 			},
-			"author": schema.ObjectType{
-				Description: utils.ToPtr("An author"),
+			"event": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"first_name": {
-						Description: utils.ToPtr("The author's first name"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-					"id": {
-						Description: utils.ToPtr("The author's primary key"),
-						Type:        schema.NewNamedType("Int").Encode(),
-					},
-					"last_name": {
-						Description: utils.ToPtr("The author's last name"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
+					"dataset": {Type: schema.NewNamedType("String").Encode()},
 				},
 			},
-			"institution": schema.ObjectType{
-				Description: utils.ToPtr("An institution"),
+			"geoip": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"departments": schema.ObjectField{
-						Description: utils.ToPtr("The institution's departments"),
-						Type:        schema.NewArrayType(schema.NewNamedType("String")).Encode(),
-					},
-					"id": schema.ObjectField{
-						Description: utils.ToPtr("The institution's primary key"),
-						Type:        schema.NewNamedType("Int").Encode(),
-					},
-					"location": schema.ObjectField{
-						Description: utils.ToPtr("The institution's location"),
-						Type:        schema.NewNamedType("location").Encode(),
-					},
-					"name": schema.ObjectField{
-						Description: utils.ToPtr("The institution's name"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-					"staff": schema.ObjectField{
-						Description: utils.ToPtr("The institution's staff"),
-						Type:        schema.NewArrayType(schema.NewNamedType("staff_member")).Encode(),
-					},
+					"city_name":        {Type: schema.NewNamedType("String").Encode()},
+					"continent_name":   {Type: schema.NewNamedType("String").Encode()},
+					"country_iso_code": {Type: schema.NewNamedType("String").Encode()},
+					"location":         {Type: schema.NewNamedType("String").Encode()},
+					"region_name":      {Type: schema.NewNamedType("String").Encode()},
 				},
 			},
-			"location": schema.ObjectType{
-				Description: utils.ToPtr("A location"),
+			"products": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"campuses": schema.ObjectField{
-						Description: utils.ToPtr("The location's campuses"),
-						Type:        schema.NewArrayType(schema.NewNamedType("String")).Encode(),
+					"_id":             {Type: schema.NewNamedType("String").Encode()},
+					"base_price":      {Type: schema.NewNamedType("Float").Encode()},
+					"base_unit_price": {Type: schema.NewNamedType("Float").Encode()},
+					"category":        {Type: schema.NewNamedType("String").Encode()},
+					"created_on": {
+						Description: utils.ToPtr("handle date object"),
+						Type:        schema.NewNamedType("Float").Encode(),
 					},
-					"city": schema.ObjectField{
-						Description: utils.ToPtr("The location's city"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-					"country": schema.ObjectField{
-						Description: utils.ToPtr("The location's country"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-				},
-			},
-			"staff_member": schema.ObjectType{
-				Description: utils.ToPtr("A staff member"),
-				Fields: schema.ObjectTypeFields{
-					"first_name": schema.ObjectField{
-						Description: utils.ToPtr("The staff member's first name"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-					"last_name": schema.ObjectField{
-						Description: utils.ToPtr("The staff member's last name"),
-						Type:        schema.NewNamedType("String").Encode(),
-					},
-					"specialities": schema.ObjectField{
-						Description: utils.ToPtr("The staff member's specialities"),
-						Type:        schema.NewArrayType(schema.NewNamedType("String")).Encode(),
-					},
-				},
+					"discount_amount":      {Type: schema.NewNamedType("Float").Encode()},
+					"discount_percentage":  {Type: schema.NewNamedType("Float").Encode()},
+					"manufacturer":         {Type: schema.NewNamedType("String").Encode()},
+					"min_price":            {Type: schema.NewNamedType("Float").Encode()},
+					"price":                {Type: schema.NewNamedType("Float").Encode()},
+					"product_name":         {Type: schema.NewNamedType("String").Encode()},
+					"quantity":             {Type: schema.NewNamedType("Int").Encode()},
+					"sku":                  {Type: schema.NewNamedType("String").Encode()},
+					"tax_amount":           {Type: schema.NewNamedType("Float").Encode()},
+					"taxful_price":         {Type: schema.NewNamedType("Float").Encode()},
+					"taxless_price":        {Type: schema.NewNamedType("Float").Encode()},
+					"unit_discount_amount": {Type: schema.NewNamedType("Float").Encode()},
+					"product_id":           {Type: schema.NewNamedType("Int").Encode()}},
 			},
 		},
 		Collections: []schema.CollectionInfo{
 			{
-				Name:        "articles",
-				Description: utils.ToPtr("A collection of articles"),
+				Name:        "kibana_sample_data_ecommerce",
+				Description: utils.ToPtr("A collection of ecommerce data"),
 				Arguments:   schema.CollectionInfoArguments{},
-				Type:        "article",
+				Type:        "kibana_sample_data_ecommerce",
 				UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{
-					"ArticleByID": schema.UniquenessConstraint{
-						UniqueColumns: []string{"id"},
-					},
-				},
-				ForeignKeys: schema.CollectionInfoForeignKeys{
-					"Article_AuthorID": schema.ForeignKeyConstraint{
-						ColumnMapping: schema.ForeignKeyConstraintColumnMapping{
-							"author_id": "id",
-						},
-						ForeignCollection: "authors",
-					},
-				},
-			},
-			{
-				Name:        "authors",
-				Description: utils.ToPtr("A collection of authors"),
-				Arguments:   schema.CollectionInfoArguments{},
-				Type:        "author",
-				UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{
-					"AuthorByID": schema.UniquenessConstraint{
-						UniqueColumns: []string{"id"},
+					"EcommerceByID": schema.UniquenessConstraint{
+						UniqueColumns: []string{"_id"},
 					},
 				},
 				ForeignKeys: schema.CollectionInfoForeignKeys{},
 			},
-			{
-				Name:        "institutions",
-				Description: utils.ToPtr("A collection of institutions"),
-				Arguments:   schema.CollectionInfoArguments{},
-				Type:        "institution",
-				UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{
-					"InstitutionByID": schema.UniquenessConstraint{
-						UniqueColumns: []string{"id"},
-					},
-				},
-				ForeignKeys: schema.CollectionInfoForeignKeys{},
-			},
-			{
-				Name:        "articles_by_author",
-				Description: utils.ToPtr("Articles parameterized by author"),
-				Arguments: schema.CollectionInfoArguments{
-					"author_id": schema.ArgumentInfo{
-						Type: schema.NewNamedType("Int").Encode(),
-					},
-				},
-				Type:                  "article",
-				UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{},
-				ForeignKeys:           schema.CollectionInfoForeignKeys{},
-			},
 		},
-		Functions: []schema.FunctionInfo{
-			{
-				Name:        "latest_article_id",
-				Description: utils.ToPtr("Get the ID of the most recent article"),
-				Arguments:   schema.FunctionInfoArguments{},
-				ResultType:  schema.NewNullableNamedType("Int").Encode(),
-			},
-			{
-				Name:        "latest_article",
-				Description: utils.ToPtr("Get the most recent article"),
-				Arguments:   schema.FunctionInfoArguments{},
-				ResultType:  schema.NewNullableNamedType("article").Encode(),
-			},
-		},
-		Procedures: []schema.ProcedureInfo{
-			{
-				Name:        "upsert_article",
-				Description: utils.ToPtr("Insert or update an article"),
-				Arguments: schema.ProcedureInfoArguments{
-					"article": schema.ArgumentInfo{
-						Description: utils.ToPtr("The article to insert or update"),
-						Type:        schema.NewNamedType("article").Encode(),
-					},
-				},
-				ResultType: schema.NewNullableNamedType("article").Encode(),
-			},
-		},
+		Functions:  []schema.FunctionInfo{},
+		Procedures: []schema.ProcedureInfo{},
 	}, nil
 }
 

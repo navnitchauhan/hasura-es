@@ -1,34 +1,23 @@
 package main
 
 import (
-	"context"
-	"fmt"
-
+	"github.com/hasura/ndc-codegen-example/types"
 	"github.com/hasura/ndc-sdk-go/connector"
 )
 
+// Start the connector server at http://localhost:8080
+//
+//	go run . serve
+//
+// See [NDC Go SDK] for more information.
+//
+// [NDC Go SDK]: https://github.com/hasura/ndc-sdk-go
 func main() {
-	var cli CLI
-	if err := connector.StartCustom[Configuration, State](
-		&cli,
+	if err := connector.Start[types.Configuration, types.State](
 		&Connector{},
-		connector.WithMetricsPrefix("ndc_ref"),
-		connector.WithDefaultServiceName("ndc_ref"),
+		connector.WithMetricsPrefix("codegen"),
+		connector.WithDefaultServiceName("codegen"),
 	); err != nil {
 		panic(err)
-	}
-}
-
-type CLI struct {
-	connector.ServeCLI
-	Version struct{} `cmd:"" help:"Print the version."`
-}
-
-func (cli *CLI) Execute(ctx context.Context, command string) error {
-	switch command {
-	case "version":
-		return nil
-	default:
-		return fmt.Errorf("unknown command <%s>", command)
 	}
 }

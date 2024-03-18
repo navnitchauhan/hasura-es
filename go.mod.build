@@ -1,5 +1,0 @@
-module github.com/hasura/ndc-sdk-go-reference
-
-go 1.21
-
-require github.com/hasura/ndc-sdk-go v0.2.0

@@ -1,17 +1,11 @@
-# NDC example with CSV
+# codegen Connector
 
-The connector is ported from [NDC Reference Connector](https://github.com/hasura/ndc-spec/tree/main/ndc-reference) that read CSV files into memory. It is intended to illustrate the concepts involved, and should be complete, in the sense that every specification feature is covered. It is not optimized and is not intended for production use, but might be useful for testing.
+## Get started
 
-## Getting Started
+Start the connector server at http://localhost:8080
 
-```bash
+```go
 go run . serve
 ```
 
-## Using the reference connector
-
-The reference connector runs on http://localhost:8080:
-
-```sh
-curl http://localhost:8080/schema | jq .
-```
+See [NDC Go SDK](https://github.com/hasura/ndc-sdk-go) for more information and [the generation tool](https://github.com/hasura/ndc-sdk-go/tree/main/cmd/ndc-go-sdk) for command documentation.

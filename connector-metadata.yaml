@@ -1,5 +1,0 @@
-packagingDefinition:
-  type: ManagedDockerBuild
-supportedEnvironmentVariables: []
-commands: {}
-dockerComposeWatch: []

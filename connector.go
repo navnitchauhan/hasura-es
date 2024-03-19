@@ -245,18 +245,18 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 			},
 		},
 		Collections: []schema.CollectionInfo{
-			// {
-			// 	Name:        "kibana_sample_data_ecommerces",
-			// 	Description: utils.ToPtr("A collection of ecommerce data"),
-			// 	Arguments:   schema.CollectionInfoArguments{},
-			// 	Type:        "kibana_sample_data_ecommerce",
-			// 	UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{
-			// 		"EcommerceByID": schema.UniquenessConstraint{
-			// 			UniqueColumns: []string{"_id"},
-			// 		},
-			// 	},
-			// 	ForeignKeys: schema.CollectionInfoForeignKeys{},
-			// },
+			{
+				Name:        "kibana_sample_data_ecommerces",
+				Description: utils.ToPtr("A collection of ecommerce data"),
+				Arguments:   schema.CollectionInfoArguments{},
+				Type:        "kibana_sample_data_ecommerce",
+				UniquenessConstraints: schema.CollectionInfoUniquenessConstraints{
+					"EcommerceByID": schema.UniquenessConstraint{
+						UniqueColumns: []string{"_id"},
+					},
+				},
+				ForeignKeys: schema.CollectionInfoForeignKeys{},
+			},
 		},
 		Functions:  []schema.FunctionInfo{},
 		Procedures: []schema.ProcedureInfo{},

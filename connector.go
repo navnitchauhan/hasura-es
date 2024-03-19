@@ -573,7 +573,7 @@ func executeElasticQuery(
 		source := hitData["_source"].(map[string]interface{})
 		id := hitData["_id"].(interface{})
 		category := source["category"].(interface{})
-		extractedData["id"] = id
+		extractedData["_id"] = id
 		extractedData["category"] = category
 	}
 

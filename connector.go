@@ -559,11 +559,25 @@ func executeElasticQuery(
 	fmt.Println("Response: ", res)
 	defer res.Body.Close()
 
+	extractedData := make(map[string]interface{})
+
 	// Handle response
 	if err := json.NewDecoder(res.Body).Decode(&row); err != nil {
 		fmt.Println("Error parsing response body:", err)
 	}
-	rows = append(rows, row)
+
+	// Extract _id and category fields and put them into the empty map
+	hits := row["hits"].(map[string]interface{})["hits"].([]interface{})
+	for _, hit := range hits {
+		hitData := hit.(map[string]interface{})
+		source := hitData["_source"].(map[string]interface{})
+		id := hitData["_id"].(interface{})
+		category := source["category"].(interface{})
+		extractedData["id"] = id
+		extractedData["category"] = category
+	}
+
+	rows = append(rows, extractedData)
 	fmt.Println("Rows: ", rows)
 	return &schema.RowSet{
 		Aggregates: aggregates,

@@ -279,6 +279,7 @@ func (mc *Connector) MutationExplain(ctx context.Context, configuration *Configu
 
 func (mc *Connector) Query(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
 
+	fmt.Println("QueryRequerst: ", request)
 	variableSets := request.Variables
 	if variableSets == nil {
 		variableSets = []schema.QueryRequestVariablesElem{make(map[string]any)}
@@ -294,7 +295,7 @@ func (mc *Connector) Query(ctx context.Context, configuration *Configuration, st
 
 		rowSets = append(rowSets, *rowSet)
 	}
-
+	fmt.Println("rowSet: ", rowSets)
 	return rowSets, nil
 }
 
@@ -429,6 +430,9 @@ func executeQueryWithVariables(
 	variables map[string]any,
 	state *State,
 ) (*schema.RowSet, error) {
+
+	fmt.Println("Query: ", query)
+
 	argumentValues := make(map[string]schema.Argument)
 
 	for argumentName, argument := range arguments {

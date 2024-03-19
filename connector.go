@@ -575,9 +575,9 @@ func executeElasticQuery(
 		category := source["category"].(interface{})
 		extractedData["_id"] = id
 		extractedData["category"] = category
+		rows = append(rows, extractedData)
 	}
 
-	rows = append(rows, extractedData)
 	fmt.Println("Rows: ", rows)
 	return &schema.RowSet{
 		Aggregates: aggregates,

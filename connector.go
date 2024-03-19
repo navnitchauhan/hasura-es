@@ -188,9 +188,9 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 					"customer_phone":      schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
 					"day_of_week":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
 					"day_of_week_i":       schema.ObjectField{Type: schema.NewNamedType("Int").Encode()},
-					"event":               schema.ObjectField{Type: schema.NewNestedObject("event").Encode()},
-					"geoip":               schema.ObjectField{Type: schema.NewNestedObject("geoip").Encode()},
-					"manufacturer":        schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					// "event":               schema.ObjectField{Type: schema.NewNestedObject("event").Encode()},
+					// "geoip":               schema.ObjectField{Type: schema.NewNestedObject("geoip").Encode()},
+					"manufacturer": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
 					"order_date": schema.ObjectField{
 						Type:        schema.NewNamedType("String").Encode(),
 						Description: utils.ToPtr("handle date object"),

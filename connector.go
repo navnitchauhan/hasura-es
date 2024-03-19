@@ -195,7 +195,7 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 						Type:        schema.NewNamedType("String").Encode(),
 						Description: utils.ToPtr("handle date object"),
 					},
-					"products":              schema.ObjectField{Type: schema.NewNamedType("products").Encode()},
+					// "products":              schema.ObjectField{Type: schema.NewNamedType("products").Encode()},
 					"sku":                   schema.ObjectField{Type: schema.NewArrayType(schema.NewNamedType("String")).Encode()},
 					"taxful_total_price":    schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"taxless_total_price":   schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},

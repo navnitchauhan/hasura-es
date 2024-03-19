@@ -548,13 +548,12 @@ func executeElasticQuery(
         }
     }`
 	aggregates := make(map[string]any)
-	rows := make(map[string]any)
+	rows := make([]map[string]any, 0)
 
 	// Perform the query
 	res, err := performQuery(queryDSL)
 	if err != nil {
 		fmt.Println("Error performing query:", err)
-		return
 	}
 
 	defer res.Body.Close()
@@ -562,7 +561,6 @@ func executeElasticQuery(
 	// Handle response
 	if err := json.NewDecoder(res.Body).Decode(&rows); err != nil {
 		fmt.Println("Error parsing response body:", err)
-		return
 	}
 
 	return &schema.RowSet{
@@ -596,7 +594,6 @@ func performQuery(queryDSL string) (*esapi.Response, error) {
 	return res, nil
 }
 func executeQuery(
-	ctx context.Context,
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
 	state *State,

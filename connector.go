@@ -443,11 +443,7 @@ func executeQueryWithVariables(
 		}
 	}
 
-	coll, err := getCollectionByName(collection, argumentValues, state)
-	if err != nil {
-		return nil, err
-	}
-	return executeElasticQuery(ctx, collectionRelationships, variables, state, query, nil, coll, false)
+	return executeElasticQuery(ctx, collectionRelationships, variables, state, query, nil, collection, false)
 }
 
 func evalAggregate(aggregate *schema.Aggregate, paginated []map[string]any) (any, error) {
@@ -534,7 +530,7 @@ func executeElasticQuery(
 	state *State,
 	query *schema.Query,
 	root map[string]any,
-	collection []map[string]any,
+	collection string,
 	skipMappingFields bool,
 ) (*schema.RowSet, error) {
 	fieldsStr := ""

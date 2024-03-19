@@ -538,8 +538,8 @@ func executeElasticQuery(
 	}
 	fieldsStr = fieldsStr[:len(fieldsStr)-1]
 	queryDSL := `{
+		"_source": [` + fieldsStr + `],
         "query": {
-			"_source": [` + fieldsStr + `], 
             "match_all": {}
         }
     }`

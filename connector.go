@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
 
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -285,7 +288,7 @@ func (mc *Connector) Query(ctx context.Context, configuration *Configuration, st
 	rowSets := make([]schema.RowSet, 0, len(variableSets))
 
 	for _, variables := range variableSets {
-		rowSet, err := executeQueryWithVariables(request.Collection, request.Arguments, request.CollectionRelationships, &request.Query, variables, state)
+		rowSet, err := executeQueryWithVariables(ctx, request.Collection, request.Arguments, request.CollectionRelationships, &request.Query, variables, state)
 		if err != nil {
 			return nil, err
 		}
@@ -419,6 +422,7 @@ func executeDeleteArticles(
 }
 
 func executeQueryWithVariables(
+	ctx context.Context,
 	collection string,
 	arguments map[string]schema.Argument,
 	collectionRelationships map[string]schema.Relationship,
@@ -443,7 +447,7 @@ func executeQueryWithVariables(
 	if err != nil {
 		return nil, err
 	}
-	return executeQuery(collectionRelationships, variables, state, query, nil, coll, false)
+	return executeElasticQuery(ctx, collectionRelationships, variables, state, query, nil, coll, false)
 }
 
 func evalAggregate(aggregate *schema.Aggregate, paginated []map[string]any) (any, error) {
@@ -523,7 +527,76 @@ func evalAggregateFunction(function string, values []any) (*int, error) {
 	}
 }
 
+func executeElasticQuery(
+	ctx context.Context,
+	collectionRelationships map[string]schema.Relationship,
+	variables map[string]any,
+	state *State,
+	query *schema.Query,
+	root map[string]any,
+	collection []map[string]any,
+	skipMappingFields bool,
+) (*schema.RowSet, error) {
+	fieldsStr := ""
+	for fieldName, _ := range query.Fields {
+		fieldsStr = fieldsStr + fieldName
+	}
+	queryDSL := `{
+        "query": {
+			"_source": [` + fieldsStr + `], 
+            "match_all": {}
+        }
+    }`
+	aggregates := make(map[string]any)
+	rows := make(map[string]any)
+
+	// Perform the query
+	res, err := performQuery(queryDSL)
+	if err != nil {
+		fmt.Println("Error performing query:", err)
+		return
+	}
+
+	defer res.Body.Close()
+
+	// Handle response
+	if err := json.NewDecoder(res.Body).Decode(&rows); err != nil {
+		fmt.Println("Error parsing response body:", err)
+		return
+	}
+
+	return &schema.RowSet{
+		Aggregates: aggregates,
+		Rows:       rows,
+	}, nil
+}
+
+func performQuery(queryDSL string) (*esapi.Response, error) {
+	cert, _ := ioutil.ReadFile("C:/Users/navnit.chauhan/L&D/Go/elasticsearch/ca-cert.pem")
+	client, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{"https://localhost:9200"},
+		Username:  "elastic",
+		Password:  "changeme",
+		CACert:    cert,
+	})
+	if err != nil {
+		panic(err)
+	}
+	// Perform the search request
+	res, err := client.Search(
+		client.Search.WithContext(context.Background()),
+		client.Search.WithIndex("demo-query"),
+		client.Search.WithBody(strings.NewReader(queryDSL)),
+		client.Search.WithTrackTotalHits(true),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
 func executeQuery(
+	ctx context.Context,
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
 	state *State,

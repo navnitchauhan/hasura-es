@@ -542,6 +542,7 @@ func executeElasticQuery(
             "match_all": {}
         }
     }`
+	fmt.Println("Query: ", queryDSL)
 	aggregates := make(map[string]any)
 	rows := make([]map[string]any, 0)
 	row := make(map[string]any)
@@ -550,7 +551,7 @@ func executeElasticQuery(
 	if err != nil {
 		fmt.Println("Error performing query:", err)
 	}
-
+	fmt.Println("Response: ", res)
 	defer res.Body.Close()
 
 	// Handle response
@@ -558,7 +559,7 @@ func executeElasticQuery(
 		fmt.Println("Error parsing response body:", err)
 	}
 	rows = append(rows, row)
-
+	fmt.Println("Rows: ", rows)
 	return &schema.RowSet{
 		Aggregates: aggregates,
 		Rows:       rows,

@@ -532,10 +532,11 @@ func executeElasticQuery(
 	collection string,
 	skipMappingFields bool,
 ) (*schema.RowSet, error) {
-	fieldsStr := ""
+	fieldsStr := ``
 	for fieldName, _ := range query.Fields {
-		fieldsStr = fieldsStr + fieldName
+		fieldsStr = fieldsStr + `"` + fieldName + `",`
 	}
+	fieldsStr = fieldsStr[:len(fieldsStr)-1]
 	queryDSL := `{
         "query": {
 			"_source": [` + fieldsStr + `], 

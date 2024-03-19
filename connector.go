@@ -547,7 +547,7 @@ func executeElasticQuery(
 	rows := make([]map[string]any, 0)
 
 	// Perform the query
-	res, err := performQuery(queryDSL)
+	res, err := performQuery(collection, queryDSL)
 	if err != nil {
 		fmt.Println("Error performing query:", err)
 	}
@@ -565,7 +565,7 @@ func executeElasticQuery(
 	}, nil
 }
 
-func performQuery(queryDSL string) (*esapi.Response, error) {
+func performQuery(index string, queryDSL string) (*esapi.Response, error) {
 	cert, _ := ioutil.ReadFile("C:/Users/navnit.chauhan/L&D/Go/elasticsearch/ca-cert.pem")
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{"https://localhost:9200"},
@@ -579,7 +579,7 @@ func performQuery(queryDSL string) (*esapi.Response, error) {
 	// Perform the search request
 	res, err := client.Search(
 		client.Search.WithContext(context.Background()),
-		client.Search.WithIndex("demo-query"),
+		client.Search.WithIndex(index),
 		client.Search.WithBody(strings.NewReader(queryDSL)),
 		client.Search.WithTrackTotalHits(true),
 	)

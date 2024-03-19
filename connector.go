@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"reflect"
 	"regexp"
 	"sort"
@@ -566,12 +565,12 @@ func executeElasticQuery(
 }
 
 func performQuery(index string, queryDSL string) (*esapi.Response, error) {
-	cert, _ := ioutil.ReadFile("C:/Users/navnit.chauhan/L&D/Go/elasticsearch/ca-cert.pem")
+	// cert, _ := ioutil.ReadFile("C:/Users/navnit.chauhan/L&D/Go/elasticsearch/ca-cert.pem")
 	client, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"https://localhost:9200"},
-		Username:  "elastic",
+		Addresses: []string{"https://12f248d44c594b04b835c35a7b513e95.us-central1.gcp.cloud.es.io:443"},
+		Username:  "enterprise_search",
 		Password:  "changeme",
-		CACert:    cert,
+		// CACert:    cert,
 	})
 	if err != nil {
 		panic(err)
@@ -579,7 +578,7 @@ func performQuery(index string, queryDSL string) (*esapi.Response, error) {
 	// Perform the search request
 	res, err := client.Search(
 		client.Search.WithContext(context.Background()),
-		client.Search.WithIndex(index),
+		client.Search.WithIndex("kibana_sample_data_ecommerce"),
 		client.Search.WithBody(strings.NewReader(queryDSL)),
 		client.Search.WithTrackTotalHits(true),
 	)

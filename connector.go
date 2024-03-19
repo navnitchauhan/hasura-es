@@ -544,7 +544,7 @@ func executeElasticQuery(
     }`
 	aggregates := make(map[string]any)
 	rows := make([]map[string]any, 0)
-
+	row := make(map[string]any)
 	// Perform the query
 	res, err := performQuery(collection, queryDSL)
 	if err != nil {
@@ -554,9 +554,10 @@ func executeElasticQuery(
 	defer res.Body.Close()
 
 	// Handle response
-	if err := json.NewDecoder(res.Body).Decode(&rows); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&row); err != nil {
 		fmt.Println("Error parsing response body:", err)
 	}
+	rows = append(rows, row)
 
 	return &schema.RowSet{
 		Aggregates: aggregates,

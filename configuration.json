@@ -1,0 +1,519 @@
+{
+    "collections": [
+        {
+            "arguments": {},
+            "foreign_keys": {},
+            "name": "test_mappingss",
+            "type": "test_mappings",
+            "uniqueness_constraints": {
+                "ID": {
+                    "unique_columns": [
+                        "_id"
+                    ]
+                }
+            }
+        },
+        {
+            "arguments": {},
+            "foreign_keys": {},
+            "name": "kibana_sample_data_ecommerces",
+            "type": "kibana_sample_data_ecommerce",
+            "uniqueness_constraints": {
+                "ID": {
+                    "unique_columns": [
+                        "_id"
+                    ]
+                }
+            }
+        }
+    ],
+    "functions": [],
+    "object_types": {
+        "kibana_sample_data_ecommerce": {
+            "fields": {
+                "_id.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "category": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "category.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "currency": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_birth_date": {
+                    "type": {
+                        "name": "date",
+                        "type": "named"
+                    }
+                },
+                "customer_first_name": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "customer_first_name.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_full_name": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "customer_full_name.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_gender": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_id": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_last_name": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "customer_last_name.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "customer_phone": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "day_of_week": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "day_of_week_i": {
+                    "type": {
+                        "name": "integer",
+                        "type": "named"
+                    }
+                },
+                "email": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "event.dataset": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "geoip.city_name": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "geoip.continent_name": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "geoip.country_iso_code": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "geoip.location": {
+                    "type": {
+                        "name": "geo_point",
+                        "type": "named"
+                    }
+                },
+                "geoip.region_name": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "manufacturer": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "manufacturer.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "order_date": {
+                    "type": {
+                        "name": "date",
+                        "type": "named"
+                    }
+                },
+                "order_id": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "product_name.keyword": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "products._id": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "products.base_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.base_unit_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.category": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "products.created_on": {
+                    "type": {
+                        "name": "date",
+                        "type": "named"
+                    }
+                },
+                "products.discount_amount": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.discount_percentage": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.manufacturer": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "products.min_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.product_id": {
+                    "type": {
+                        "name": "long",
+                        "type": "named"
+                    }
+                },
+                "products.product_name": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                },
+                "products.quantity": {
+                    "type": {
+                        "name": "integer",
+                        "type": "named"
+                    }
+                },
+                "products.sku": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "products.tax_amount": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.taxful_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.taxless_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "products.unit_discount_amount": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "sku": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "taxful_total_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "taxless_total_price": {
+                    "type": {
+                        "name": "half_float",
+                        "type": "named"
+                    }
+                },
+                "total_quantity": {
+                    "type": {
+                        "name": "integer",
+                        "type": "named"
+                    }
+                },
+                "total_unique_products": {
+                    "type": {
+                        "name": "integer",
+                        "type": "named"
+                    }
+                },
+                "type": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "user": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                }
+            }
+        },
+        "test_mappings": {
+            "fields": {
+                "age": {
+                    "type": {
+                        "name": "integer",
+                        "type": "named"
+                    }
+                },
+                "email": {
+                    "type": {
+                        "name": "keyword",
+                        "type": "named"
+                    }
+                },
+                "name": {
+                    "type": {
+                        "name": "text",
+                        "type": "named"
+                    }
+                }
+            }
+        }
+    },
+    "procedures": [],
+    "scalar_types": {
+        "date": {
+            "aggregate_functions": {},
+            "comparison_operators": {}
+        },
+        "geo_point": {
+            "aggregate_functions": {},
+            "comparison_operators": {}
+        },
+        "half_float": {
+            "aggregate_functions": {},
+            "comparison_operators": {}
+        },
+        "integer": {
+            "aggregate_functions": {
+                "avg": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "cardinality": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "max": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "min": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "percentiles": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "stats": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                },
+                "sum": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "integer",
+                            "type": "named"
+                        }
+                    }
+                }
+            },
+            "comparison_operators": {
+                "eq": {
+                    "argument_type": {
+                        "name": "integer",
+                        "type": "named"
+                    },
+                    "type": "custom"
+                },
+                "in": {
+                    "argument_type": {
+                        "name": "integer",
+                        "type": "named"
+                    },
+                    "type": "custom"
+                }
+            }
+        },
+        "keyword": {
+            "aggregate_functions": {
+                "cardinality": {
+                    "result_type": {
+                        "type": "nullable",
+                        "underlying_type": {
+                            "name": "keyword",
+                            "type": "named"
+                        }
+                    }
+                }
+            },
+            "comparison_operators": {
+                "eq": {
+                    "argument_type": {
+                        "name": "keyword",
+                        "type": "named"
+                    },
+                    "type": "custom"
+                },
+                "in": {
+                    "argument_type": {
+                        "name": "keyword",
+                        "type": "named"
+                    },
+                    "type": "custom"
+                },
+                "like": {
+                    "argument_type": {
+                        "name": "keyword",
+                        "type": "named"
+                    },
+                    "type": "custom"
+                }
+            }
+        },
+        "long": {
+            "aggregate_functions": {},
+            "comparison_operators": {}
+        },
+        "text": {
+            "aggregate_functions": {},
+            "comparison_operators": {}
+        }
+    }
+}

@@ -9,8 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/hasura/ndc-sdk-go-reference/configuration"
+	query_engine "github.com/hasura/ndc-sdk-go-reference/query"
+
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -50,65 +51,16 @@ type Institution struct {
 	Departments []string            `json:"departments"`
 }
 
-type State struct {
-	Authors      []Author
-	Articles     []Article
-	Institutions []Institution
-	Telemetry    *connector.TelemetryState
-}
-
-func (s *State) GetLatestArticle() *Article {
-	if len(s.Articles) == 0 {
-		return nil
-	}
-
-	var latestArticle Article
-	for _, article := range s.Articles {
-		if latestArticle.ID < article.ID {
-			latestArticle = article
-		}
-	}
-
-	return &latestArticle
-}
-
 type Connector struct{}
 
 func (mc *Connector) ParseConfiguration(ctx context.Context, rawConfiguration string) (*Configuration, error) {
 	return &Configuration{}, nil
 }
-func (mc *Connector) TryInitState(ctx context.Context, configuration *Configuration, metrics *connector.TelemetryState) (*State, error) {
-	articles, err := readArticles()
-
-	if err != nil {
-		return nil, schema.InternalServerError("failed to read articles from csv", map[string]any{
-			"cause": err.Error(),
-		})
-	}
-
-	authors, err := readAuthors()
-	if err != nil {
-		return nil, schema.InternalServerError("failed to read authors from csv", map[string]any{
-			"cause": err.Error(),
-		})
-	}
-
-	institutions, err := readInstitutions()
-	if err != nil {
-		return nil, schema.InternalServerError("failed to read institutions from json", map[string]any{
-			"cause": err.Error(),
-		})
-	}
-
-	return &State{
-		Authors:      authors,
-		Articles:     articles,
-		Institutions: institutions,
-		Telemetry:    metrics,
-	}, nil
+func (mc *Connector) TryInitState(ctx context.Context, configuration *Configuration, metrics *connector.TelemetryState) (*configuration.State, error) {
+	return nil, nil
 }
 
-func (mc *Connector) HealthCheck(ctx context.Context, configuration *Configuration, state *State) error {
+func (mc *Connector) HealthCheck(ctx context.Context, configuration *Configuration, state *configuration.State) error {
 	return nil
 }
 
@@ -128,21 +80,31 @@ func (mc *Connector) GetCapabilities(configuration *Configuration) schema.Capabi
 	}
 }
 
-func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration, state *State) (schema.SchemaResponseMarshaler, error) {
+func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration, state *configuration.State) (schema.SchemaResponseMarshaler, error) {
+	// var schemaRes schema.SchemaResponse
+	// schemaB, err := os.ReadFile("configuration.json")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// err = json.Unmarshal(schemaB, &schemaRes)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
 	return &schema.SchemaResponse{
 		ScalarTypes: schema.SchemaResponseScalarTypes{
-			"Int": schema.ScalarType{
+			"integer": schema.ScalarType{
 				AggregateFunctions: schema.ScalarTypeAggregateFunctions{
 					"max": schema.AggregateFunctionDefinition{
-						ResultType: schema.NewNullableNamedType("Int").Encode(),
+						ResultType: schema.NewNullableNamedType("integer").Encode(),
 					},
 					"min": schema.AggregateFunctionDefinition{
-						ResultType: schema.NewNullableNamedType("Int").Encode(),
+						ResultType: schema.NewNullableNamedType("integer").Encode(),
 					},
 				},
 				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
-					"eq": schema.NewComparisonOperatorEqual().Encode(),
-					"in": schema.NewComparisonOperatorIn().Encode(),
+					"eq": schema.NewComparisonOperatorCustom(schema.NewNamedType("integer")).Encode(),
+					"in": schema.NewComparisonOperatorCustom(schema.NewNamedType("integer")).Encode(),
 				},
 			},
 			"Float": schema.ScalarType{
@@ -155,16 +117,16 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 					},
 				},
 				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
-					"eq": schema.NewComparisonOperatorEqual().Encode(),
-					"in": schema.NewComparisonOperatorIn().Encode(),
+					"eq": schema.NewComparisonOperatorCustom(schema.NewNamedType("Float")).Encode(),
+					"in": schema.NewComparisonOperatorCustom(schema.NewNamedType("Float")).Encode(),
 				},
 			},
-			"String": schema.ScalarType{
+			"keyword": schema.ScalarType{
 				AggregateFunctions: schema.ScalarTypeAggregateFunctions{},
 				ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{
-					"eq":   schema.NewComparisonOperatorEqual().Encode(),
-					"in":   schema.NewComparisonOperatorIn().Encode(),
-					"like": schema.NewComparisonOperatorCustom(schema.NewNamedType("String")).Encode(),
+					"eq":   schema.NewComparisonOperatorCustom(schema.NewNamedType("keyword")).Encode(),
+					"in":   schema.NewComparisonOperatorCustom(schema.NewNamedType("keyword")).Encode(),
+					"like": schema.NewComparisonOperatorCustom(schema.NewNamedType("keyword")).Encode(),
 				},
 			},
 		},
@@ -173,77 +135,77 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 				Description: nil,
 				Fields: schema.ObjectTypeFields{
 					"_id": schema.ObjectField{
-						Type:        schema.NewNamedType("String").Encode(),
+						Type:        schema.NewNamedType("keyword").Encode(),
 						Description: utils.ToPtr("An author"),
 					},
-					"category": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"currency": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"category": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"currency": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"customer_birth_date": schema.ObjectField{
-						Type:        schema.NewNamedType("String").Encode(),
+						Type:        schema.NewNamedType("keyword").Encode(),
 						Description: utils.ToPtr("handle date object"),
 					},
-					"customer_first_name": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"customer_full_name":  schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"customer_gender":     schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"customer_id":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"customer_last_name":  schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"customer_phone":      schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"day_of_week":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"day_of_week_i":       schema.ObjectField{Type: schema.NewNamedType("Int").Encode()},
+					"customer_first_name": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"customer_full_name":  schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"customer_gender":     schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"customer_id":         schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"customer_last_name":  schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"customer_phone":      schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"day_of_week":         schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"day_of_week_i":       schema.ObjectField{Type: schema.NewNamedType("integer").Encode()},
 					// "event":               schema.ObjectField{Type: schema.NewNestedObject("event").Encode()},
 					// "geoip":               schema.ObjectField{Type: schema.NewNestedObject("geoip").Encode()},
-					"manufacturer": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"manufacturer": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"order_date": schema.ObjectField{
-						Type:        schema.NewNamedType("String").Encode(),
+						Type:        schema.NewNamedType("keyword").Encode(),
 						Description: utils.ToPtr("handle date object"),
 					},
 					// "products":              schema.ObjectField{Type: schema.NewNamedType("products").Encode()},
-					"sku":                   schema.ObjectField{Type: schema.NewArrayType(schema.NewNamedType("String")).Encode()},
+					"sku":                   schema.ObjectField{Type: schema.NewArrayType(schema.NewNamedType("keyword")).Encode()},
 					"taxful_total_price":    schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"taxless_total_price":   schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
-					"total_quantity":        schema.ObjectField{Type: schema.NewNamedType("Int").Encode()},
-					"total_unique_products": schema.ObjectField{Type: schema.NewNamedType("Int").Encode()},
-					"type":                  schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"user":                  schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"total_quantity":        schema.ObjectField{Type: schema.NewNamedType("integer").Encode()},
+					"total_unique_products": schema.ObjectField{Type: schema.NewNamedType("integer").Encode()},
+					"type":                  schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"user":                  schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 				},
 			},
 			"event": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"dataset": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"dataset": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 				},
 			},
 			"geoip": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"city_name":        schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"continent_name":   schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"country_iso_code": schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"location":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"region_name":      schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"city_name":        schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"continent_name":   schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"country_iso_code": schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"location":         schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"region_name":      schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 				},
 			},
 			"products": schema.ObjectType{
 				Fields: schema.ObjectTypeFields{
-					"_id":             schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"_id":             schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"base_price":      schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"base_unit_price": schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
-					"category":        schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"category":        schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"created_on": schema.ObjectField{
 						Description: utils.ToPtr("handle date object"),
 						Type:        schema.NewNamedType("Float").Encode(),
 					},
 					"discount_amount":      schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"discount_percentage":  schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
-					"manufacturer":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"manufacturer":         schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"min_price":            schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"price":                schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
-					"product_name":         schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
-					"quantity":             schema.ObjectField{Type: schema.NewNamedType("Int").Encode()},
-					"sku":                  schema.ObjectField{Type: schema.NewNamedType("String").Encode()},
+					"product_name":         schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
+					"quantity":             schema.ObjectField{Type: schema.NewNamedType("integer").Encode()},
+					"sku":                  schema.ObjectField{Type: schema.NewNamedType("keyword").Encode()},
 					"tax_amount":           schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"taxful_price":         schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"taxless_price":        schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
 					"unit_discount_amount": schema.ObjectField{Type: schema.NewNamedType("Float").Encode()},
-					"product_id":           schema.ObjectField{Type: schema.NewNamedType("Int").Encode()}},
+					"product_id":           schema.ObjectField{Type: schema.NewNamedType("integer").Encode()}},
 			},
 		},
 		Collections: []schema.CollectionInfo{
@@ -263,23 +225,29 @@ func (mc *Connector) GetSchema(ctx context.Context, configuration *Configuration
 		Functions:  []schema.FunctionInfo{},
 		Procedures: []schema.ProcedureInfo{},
 	}, nil
+	// return schemaRes, nil
 }
 
-func (mc *Connector) QueryExplain(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
+func (mc *Connector) QueryExplain(ctx context.Context, configuration *Configuration, state *configuration.State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
 	return &schema.ExplainResponse{
 		Details: schema.ExplainResponseDetails{},
 	}, nil
 }
 
-func (mc *Connector) MutationExplain(ctx context.Context, configuration *Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
+func (mc *Connector) MutationExplain(ctx context.Context, configuration *Configuration, state *configuration.State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
 	return &schema.ExplainResponse{
 		Details: schema.ExplainResponseDetails{},
 	}, nil
 }
 
-func (mc *Connector) Query(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
+func (mc *Connector) Query(ctx context.Context, configuration *Configuration, state *configuration.State, request *schema.QueryRequest) (schema.QueryResponse, error) {
 
-	fmt.Println("QueryRequerst: ", request)
+	queryJosn, err := json.Marshal(request)
+	if err != nil {
+		fmt.Println("Error Marshling query")
+	}
+	fmt.Printf("QueryRequest: %v", string(queryJosn))
+
 	variableSets := request.Variables
 	if variableSets == nil {
 		variableSets = []schema.QueryRequestVariablesElem{make(map[string]any)}
@@ -299,7 +267,7 @@ func (mc *Connector) Query(ctx context.Context, configuration *Configuration, st
 	return rowSets, nil
 }
 
-func (mc *Connector) Mutation(ctx context.Context, configuration *Configuration, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
+func (mc *Connector) Mutation(ctx context.Context, configuration *Configuration, state *configuration.State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
 
 	operationResults := []schema.MutationOperationResults{}
 	for _, operation := range request.Operations {
@@ -315,7 +283,7 @@ func (mc *Connector) Mutation(ctx context.Context, configuration *Configuration,
 	}, nil
 }
 
-func executeMutationOperation(ctx context.Context, state *State, collectionRelationship schema.MutationRequestCollectionRelationships, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
+func executeMutationOperation(ctx context.Context, state *configuration.State, collectionRelationship schema.MutationRequestCollectionRelationships, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
 	switch operation.Type {
 	case schema.MutationOperationProcedure:
 		return executeProcedure(ctx, state, collectionRelationship, operation)
@@ -328,7 +296,7 @@ type UpsertArticleArguments struct {
 	Article Article `json:"article"`
 }
 
-func executeProcedure(_ context.Context, state *State, collectionRelationships schema.MutationRequestCollectionRelationships, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
+func executeProcedure(_ context.Context, state *configuration.State, collectionRelationships schema.MutationRequestCollectionRelationships, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
 	switch operation.Name {
 	case "upsert_article":
 		return executeUpsertArticle(state, operation.Arguments, operation.Fields, collectionRelationships)
@@ -340,7 +308,7 @@ func executeProcedure(_ context.Context, state *State, collectionRelationships s
 }
 
 func executeUpsertArticle(
-	state *State,
+	state *configuration.State,
 	arguments json.RawMessage,
 	fields schema.NestedField,
 	collectionRelationships map[string]schema.Relationship,
@@ -356,20 +324,15 @@ func executeUpsertArticle(
 	if args.Article.ID <= 0 {
 		if latestArticle == nil {
 			args.Article.ID = 1
-		} else {
-			args.Article.ID = latestArticle.ID + 1
 		}
-		state.Articles = append(state.Articles, args.Article)
 	} else {
 		for i, article := range state.Articles {
 			if article.ID == args.Article.ID {
-				oldRow = &article
-				state.Articles[i] = args.Article
-				break
+				fmt.Println(i)
 			}
 		}
 		if oldRow == nil {
-			state.Articles = append(state.Articles, args.Article)
+			// state.Articles = append(state.Articles, args.Article)
 		}
 	}
 
@@ -382,7 +345,7 @@ func executeUpsertArticle(
 }
 
 func executeDeleteArticles(
-	state *State,
+	state *configuration.State,
 	arguments json.RawMessage,
 	fields schema.NestedField,
 	collectionRelationships map[string]schema.Relationship,
@@ -428,7 +391,7 @@ func executeQueryWithVariables(
 	collectionRelationships map[string]schema.Relationship,
 	query *schema.Query,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 ) (*schema.RowSet, error) {
 
 	fmt.Println("Query: ", query)
@@ -446,7 +409,7 @@ func executeQueryWithVariables(
 		}
 	}
 
-	return executeElasticQuery(ctx, collectionRelationships, variables, state, query, nil, collection, false)
+	return query_engine.ExecuteElasticQuery(ctx, variables, state, query, collection, false)
 }
 
 func evalAggregate(aggregate *schema.Aggregate, paginated []map[string]any) (any, error) {
@@ -526,93 +489,27 @@ func evalAggregateFunction(function string, values []any) (*int, error) {
 	}
 }
 
-func executeElasticQuery(
-	ctx context.Context,
-	collectionRelationships map[string]schema.Relationship,
-	variables map[string]any,
-	state *State,
-	query *schema.Query,
-	root map[string]any,
-	collection string,
-	skipMappingFields bool,
-) (*schema.RowSet, error) {
-	fieldsStr := ``
-	for fieldName, _ := range query.Fields {
-		fieldsStr = fieldsStr + `"` + fieldName + `",`
-	}
-	fieldsStr = fieldsStr[:len(fieldsStr)-1]
-	queryDSL := `{
-		"_source": [` + fieldsStr + `],
-        "query": {
-            "match_all": {}
-        }
-    }`
-	fmt.Println("Query: ", queryDSL)
-	aggregates := make(map[string]any)
-	rows := make([]map[string]any, 0)
-	row := make(map[string]any)
-	// Perform the query
-	res, err := performQuery(collection, queryDSL)
-	if err != nil {
-		fmt.Println("Error performing query:", err)
-	}
-	fmt.Println("Response: ", res)
-	defer res.Body.Close()
+func evalElaticAggregateFunction(function string, column string, aggKey string, query string) (string, error) {
 
-	extractedData := make(map[string]interface{})
-
-	// Handle response
-	if err := json.NewDecoder(res.Body).Decode(&row); err != nil {
-		fmt.Println("Error parsing response body:", err)
+	if function == "min" || function == "max" {
+		query += `,
+		"aggs": {
+			"` + aggKey + `": {
+			  "` + function + `": {
+				"field": "` + column + `"
+			  }
+			}
+		  }`
+		return query, nil
 	}
 
-	// Extract _id and category fields and put them into the empty map
-	hits := row["hits"].(map[string]interface{})["hits"].([]interface{})
-	for _, hit := range hits {
-		hitData := hit.(map[string]interface{})
-		source := hitData["_source"].(map[string]interface{})
-		id := hitData["_id"].(interface{})
-		category := source["category"].(interface{})
-		extractedData["_id"] = id
-		extractedData["category"] = category
-		rows = append(rows, extractedData)
-	}
-
-	fmt.Println("Rows: ", rows)
-	return &schema.RowSet{
-		Aggregates: aggregates,
-		Rows:       rows,
-	}, nil
+	return query, schema.UnprocessableContentError(fmt.Sprintf("%s: invalid aggregation function", function), nil)
 }
 
-func performQuery(index string, queryDSL string) (*esapi.Response, error) {
-	// cert, _ := ioutil.ReadFile("C:/Users/navnit.chauhan/L&D/Go/elasticsearch/ca-cert.pem")
-	client, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"https://12f248d44c594b04b835c35a7b513e95.us-central1.gcp.cloud.es.io:443"},
-		Username:  "enterprise_search",
-		Password:  "changeme",
-		// CACert:    cert,
-	})
-	if err != nil {
-		panic(err)
-	}
-	// Perform the search request
-	res, err := client.Search(
-		client.Search.WithContext(context.Background()),
-		client.Search.WithIndex("kibana_sample_data_ecommerce"),
-		client.Search.WithBody(strings.NewReader(queryDSL)),
-		client.Search.WithTrackTotalHits(true),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
 func executeQuery(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	query *schema.Query,
 	root map[string]any,
 	collection []map[string]any,
@@ -675,7 +572,7 @@ func executeQuery(
 func sortCollection(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	collection []map[string]any,
 	orderBy *schema.OrderBy,
 ) ([]map[string]any, error) {
@@ -728,7 +625,7 @@ func paginate[R any](collection []R, limit *int, offset *int) []R {
 func evalOrderBy(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	orderBy *schema.OrderBy,
 	t1 map[string]any,
 	t2 map[string]any,
@@ -826,7 +723,7 @@ func compare(v1 any, v2 any) (int, error) {
 func evalOrderByElement(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	element *schema.OrderByElement,
 	item map[string]any,
 ) (any, error) {
@@ -847,7 +744,7 @@ func evalOrderByElement(
 func evalOrderByStarCountAggregate(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	item map[string]any,
 	path []schema.PathElement,
 ) (int, error) {
@@ -859,7 +756,7 @@ func evalOrderByStarCountAggregate(
 func evalOrderBySingleColumnAggregate(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	item map[string]any,
 	path []schema.PathElement,
 	column string,
@@ -884,7 +781,7 @@ func evalOrderBySingleColumnAggregate(
 func evalOrderByColumn(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	item map[string]any,
 	path []schema.PathElement,
 	name string,
@@ -910,7 +807,7 @@ func evalInCollection(
 	collectionRelationships map[string]schema.Relationship,
 	item map[string]any,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	inCollection schema.ExistsInCollection,
 ) ([]map[string]any, error) {
 	switch inCol := inCollection.Interface().(type) {
@@ -941,7 +838,7 @@ func evalInCollection(
 	}
 }
 
-func evalRow(fields map[string]schema.Field, collectionRelationships map[string]schema.Relationship, variables map[string]any, state *State, item map[string]any) (map[string]any, error) {
+func evalRow(fields map[string]schema.Field, collectionRelationships map[string]schema.Relationship, variables map[string]any, state *configuration.State, item map[string]any) (map[string]any, error) {
 	if len(fields) == 0 {
 		return nil, nil
 	}
@@ -960,7 +857,7 @@ func evalRow(fields map[string]schema.Field, collectionRelationships map[string]
 func evalNestedField(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	value any,
 	nestedField schema.NestedField,
 ) (any, error) {
@@ -1001,7 +898,7 @@ func evalNestedField(
 func evalField(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	field schema.Field,
 	row map[string]any,
 ) (any, error) {
@@ -1038,7 +935,7 @@ func evalField(
 func evalPathElement(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	relationship *schema.Relationship,
 	arguments map[string]schema.RelationshipArgument,
 	source []map[string]any,
@@ -1140,7 +1037,7 @@ func evalRelationshipArgument(variables map[string]any, row map[string]any, argu
 	}
 }
 
-func getCollectionByName(collectionName string, arguments schema.QueryRequestArguments, state *State) ([]map[string]any, error) {
+func getCollectionByName(collectionName string, arguments schema.QueryRequestArguments, state *configuration.State) ([]map[string]any, error) {
 	var rows []map[string]any
 	switch collectionName {
 	// function
@@ -1148,7 +1045,7 @@ func getCollectionByName(collectionName string, arguments schema.QueryRequestArg
 		latestArticle := state.GetLatestArticle()
 		var latestID *int
 		if latestArticle != nil {
-			latestID = &latestArticle.ID
+			// latestID = &latestArticle.ID
 		}
 		return []map[string]any{
 			{
@@ -1214,7 +1111,7 @@ func getCollectionByName(collectionName string, arguments schema.QueryRequestArg
 func evalComparisonValue(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	comparisonValue schema.ComparisonValue,
 	root map[string]any,
 	item map[string]any,
@@ -1243,7 +1140,7 @@ func evalComparisonValue(
 func evalComparisonTarget(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	target *schema.ComparisonTarget,
 	root map[string]any,
 	item map[string]any,
@@ -1277,7 +1174,7 @@ func evalComparisonTarget(
 func evalPath(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	path []schema.PathElement,
 	item map[string]any,
 ) ([]map[string]any, error) {
@@ -1301,7 +1198,7 @@ func evalPath(
 func evalExpression(
 	collectionRelationships map[string]schema.Relationship,
 	variables map[string]any,
-	state *State,
+	state *configuration.State,
 	expr schema.Expression,
 	root map[string]any,
 	item map[string]any,

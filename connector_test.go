@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/hasura/ndc-sdk-go-reference/configuration"
+
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
-func createTestServer(t *testing.T) *connector.Server[Configuration, State] {
-	server, err := connector.NewServer[Configuration, State](&Connector{}, &connector.ServerOptions{
+func createTestServer(t *testing.T) *connector.Server[Configuration, configuration.State] {
+	server, err := connector.NewServer[Configuration, configuration.State](&Connector{}, &connector.ServerOptions{
 		Configuration: "{}",
 		InlineConfig:  true,
 	}, connector.WithoutRecovery())
